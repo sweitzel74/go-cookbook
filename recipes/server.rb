@@ -97,8 +97,8 @@ end
 
 execute 'restore_db' do
   Chef::Log.info('Restoring h2db')
-  command
-    "unzip -q -u -o #{go_restore_directory}/db.zip -d /var/lib/go-server/db/h2db"
+  command "unzip -q -u -o #{go_restore_directory}/db.zip " \
+    "-d /var/lib/go-server/db/h2db"
   user 'go'
   group 'go'
   action :run
@@ -147,8 +147,8 @@ directory '/var/lib/go-server/db/config.git' do
   only_if { restore_go_config }
 end
 execute 'restore_config_repo' do
-  command
-    "unzip -q -u -o #{go_restore_directory}/config-repo.zip -d /var/lib/go-server/db/config.git"
+  command "unzip -q -u -o #{go_restore_directory}/config-repo.zip " \
+    "-d /var/lib/go-server/db/config.git"
   user 'go'
   group 'go'
   action :run

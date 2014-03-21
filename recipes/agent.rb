@@ -3,9 +3,6 @@ include_recipe 'apt'
 include_recipe 'java'
 
 go_server               = node[:go][:agent][:server_host]
-package_url             = node[:go][:agent][:package_url]
-package_checksum        = node[:go][:agent][:package_checksum]
-go_server_autoregister  = node[:go][:agent][:auto_register]
 autoregister_key        = node[:go][:agent][:auto_register_key]
 
 apt_repository 'thoughtworks' do
@@ -18,12 +15,17 @@ package 'go-agent' do
   options '--force-yes'
 end
 
-if Chef::Config[:solo] || node.attribute?('go') && node['go'].attribute?('server')
+if Chef::Config[:solo] ||
+    node.attribute?('go') &&
+    node['go'].attribute?('server')
   Chef::Log.warn(
-    "Chef-solo invocation detected.  node[:go][:server] attribute will be used for server instance configuration."
+    "Chef-solo invocation detected. " \
+    "node[:go][:server] attribute will be used " \
+    "for server instance configuration."
     )
   Chef::Log.info(
-    "Using #{node[:go][:server]} for server instance configuration, as specified in node[:go][:server]."
+    "Using #{node[:go][:server]} for server instance configuration, " \
+    "as specified in node[:go][:server]."
     )
 else
   go_servers =
@@ -34,7 +36,8 @@ else
   go_server = "#{go_servers[0][:ipaddress]}"
   go_server_autoregister = "#{go_servers[0][:go][:auto_register_agents]}"
   Chef::Log.info(
-    "Found Go server at ip address #{go_server} with automatic agent registration=#{go_server_autoregister}"
+    "Found Go server at ip address #{go_server} " \
+    "with automatic agent registration=#{go_server_autoregister}"
     )
   if go_server_autoregister
     Chef::Log.warn('Agent auto-registration enabled. ' \
@@ -60,8 +63,8 @@ end
 # default[:go][:agent][:instance_count] = node[:cpu][:total]
 
 (1..node[:go][:agent][:instance_count]).each do |i|
-  log
-  "Configuring Go agent # #{i} of #{node[:go][:agent][:instance_count]} for Go server at #{go_server}:8153"
+  log "Configuring Go agent # #{i} of #{node[:go][:agent][:instance_count]} "\
+      "for Go server at #{go_server}:8153"
   if i < 2
     suffix = ''
   else
@@ -126,7 +129,9 @@ end
     owner 'go'
     mode 0644
     variables(autoregister_key: autoregister_key,
-            agent_resources: "#{node[:os]}, #{node[:platform]},#{node[:platform]}-#{node[:platform_version]}"
+              agent_resources: "#{node[:os]},
+                                #{node[:platform]},
+                                #{node[:platform]}-#{node[:platform_version]}"
             )
     subscribes :create, "directory[/var/lib/go-agent#{suffix}/config]"
     action :nothing
@@ -135,7 +140,8 @@ end
     supports status: true, restart: true, reload: true, start: true
     action :nothing
     subscribes :restart, "template[/etc/init.d/go-agent#{suffix}]"
-    subscribes :restart, "template[/var/lib/go-agent#{suffix}/config/autoregister.properties]"
+    subscribes :restart, "template" \
+               "[/var/lib/go-agent#{suffix}/config/autoregister.properties]"
     subscribes :restart, "template[/etc/default/go-agent#{suffix}]"
   end
 end
